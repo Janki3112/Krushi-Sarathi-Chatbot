@@ -1069,7 +1069,8 @@ class OptimizedRAGPipeline:
         seen_hashes = set()
         
         for doc in documents:
-            content_hash = hashlib.md5(doc.page_content[:200].encode()).hexdigest()
+            #content_hash = hashlib.md5(doc.page_content[:200].encode()).hexdigest()
+            content_hash = hashlib.md5(result.content[:200]).hexdigest()
             if content_hash not in seen_hashes:
                 seen_hashes.add(content_hash)
                 unique_docs.append(doc)
