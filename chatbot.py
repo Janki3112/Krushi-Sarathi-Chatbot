@@ -103,7 +103,7 @@ class SearchResult:
     metadata: Dict[str, Any]
     relevance_score: float = 0.0
 
-DEFAULT_DOCS_FOLDER = r"C:\\Users\\vaish\\Desktop\\tesdt1\\doc"
+DEFAULT_DOCS_FOLDER = Path("doc")
 
 class OptimizedRedisManager:
     """Fixed Redis connection manager with proper error handling"""
