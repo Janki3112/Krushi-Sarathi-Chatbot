@@ -1,28 +1,18 @@
-streamlit==1.41.1
-python-dotenv==1.0.1
-langchain==0.3.27
-langchain-groq==0.2.3
-langchain-community==0.3.14
-langchain-core==0.3.71
-langchain-redis==0.2.3
-PyPDF2==3.0.1
-python-docx==1.2.0
-openpyxl==3.1.2
-sentence-transformers==2.7.0
-huggingface-hub==0.33.4
-chromadb==0.4.24
-scikit-learn==1.4.2
-requests==2.32.4
 beautifulsoup4==4.13.4
+googletrans== 4.0.2
 html2text==2025.4.15
-tavily-python==0.3.2
-googletrans==4.0.2
-redis==6.2.0
-tqdm==4.67.1
-pandas==2.2.3
-matplotlib==3.7.0
-plotly==5.15.0
-pathlib2==2.3.7
-transformers==4.41.1
-torch==2.3.0
-torchvision==0.15.2
+langchain==0.3.14
+langchain_community==0.3.14
+langchain_core==0.3.71
+langchain_groq==0.2.3
+langchain_redis==0.2.3
+numpy==1.26.4
+PyPDF2==3.0.1
+python-dotenv==1.0.1
+python_docx== 1.2.0
+redis== 6.2.0
+requests==2.32.4
+scikit_learn==1.4.2
+sentence_transformers==2.7.0
+streamlit==1.41.1
+tavily_python==0.3.2
