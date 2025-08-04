@@ -20,3 +20,4 @@ markdown-it-py==3.0.0
 rich==13.7.1
 pypdf
 chromadb
+torch==2.1.0
