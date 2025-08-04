@@ -1,3 +1,4 @@
+# enhanced_rag_pipeline_fixed.py - Fixed RAG Pipeline with Proper Integration
 import os
 import logging
 import warnings
@@ -49,7 +50,6 @@ from langchain_community.vectorstores import Chroma
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.documents import Document
 from sentence_transformers import SentenceTransformer
-import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Website scraping imports
@@ -103,7 +103,7 @@ class SearchResult:
     metadata: Dict[str, Any]
     relevance_score: float = 0.0
 
-DEFAULT_DOCS_FOLDER = Path("doc")
+DEFAULT_DOCS_FOLDER = r"C:\\Users\\vaish\\Desktop\\Ready Chatbot\\doc" 
 
 class OptimizedRedisManager:
     """Fixed Redis connection manager with proper error handling"""
@@ -307,6 +307,227 @@ class UnifiedCache:
             "redis_hit_rate": f"{redis_hit_rate:.1f}%",
             "local_cache_size": len(self.local_cache)
         }
+
+class UserSearchTracker:
+    """Track user searches and preferences in Redis"""
+    
+    def __init__(self, redis_manager: OptimizedRedisManager):
+        self.redis_manager = redis_manager
+        self.default_ttl = 2592000  # 30 days for user data
+    
+    def _get_user_searches_key(self, user_id: str) -> str:
+        """Generate user searches key"""
+        return f"user_searches:{user_id}"
+    
+    def _get_user_preferences_key(self, user_id: str) -> str:
+        """Generate user preferences key"""
+        return f"user_preferences:{user_id}"
+    
+    def _get_user_stats_key(self, user_id: str) -> str:
+        """Generate user stats key"""
+        return f"user_stats:{user_id}"
+    
+    def log_search(self, user_id: str, query: str, results_count: int, response_time: float) -> bool:
+        """Log user search activity"""
+        if not self.redis_manager.is_available():
+            return False
+        
+        client = self.redis_manager.get_client()
+        if not client:
+            return False
+        
+        try:
+            search_entry = {
+                "query": query,
+                "timestamp": datetime.now().isoformat(),
+                "results_count": results_count,
+                "response_time": response_time
+            }
+            
+            # Add to user's search history (keep last 100 searches)
+            searches_key = self._get_user_searches_key(user_id)
+            client.lpush(searches_key, json.dumps(search_entry))
+            client.ltrim(searches_key, 0, 99)  # Keep only last 100
+            client.expire(searches_key, self.default_ttl)
+            
+            # Update user stats
+            self._update_user_stats(user_id, query, results_count, response_time)
+            
+            return True
+            
+        except Exception as e:
+            print(f"❌ Failed to log search: {e}")
+            return False
+    
+    def _update_user_stats(self, user_id: str, query: str, results_count: int, response_time: float):
+        """Update user statistics"""
+        try:
+            client = self.redis_manager.get_client()
+            if not client:
+                return
+            
+            stats_key = self._get_user_stats_key(user_id)
+            
+            # Get current stats
+            current_stats = client.hgetall(stats_key)
+            
+            total_searches = int(current_stats.get('total_searches', 0)) + 1
+            total_response_time = float(current_stats.get('total_response_time', 0)) + response_time
+            avg_response_time = total_response_time / total_searches
+            
+            # Update stats
+            stats_update = {
+                'total_searches': total_searches,
+                'total_response_time': total_response_time,
+                'avg_response_time': round(avg_response_time, 2),
+                'last_search': datetime.now().isoformat(),
+                'last_query': query,
+                'last_results_count': results_count
+            }
+            
+            client.hset(stats_key, mapping=stats_update)
+            client.expire(stats_key, self.default_ttl)
+            
+        except Exception as e:
+            print(f"❌ Failed to update user stats: {e}")
+    
+    def get_user_search_history(self, user_id: str, limit: int = 20) -> List[Dict]:
+        """Get user's recent search history"""
+        if not self.redis_manager.is_available():
+            return []
+        
+        client = self.redis_manager.get_client()
+        if not client:
+            return []
+        
+        try:
+            searches_key = self._get_user_searches_key(user_id)
+            search_entries = client.lrange(searches_key, 0, limit - 1)
+            
+            return [json.loads(entry) for entry in search_entries]
+            
+        except Exception as e:
+            print(f"❌ Failed to get search history: {e}")
+            return []
+    
+    def get_user_stats(self, user_id: str) -> Dict[str, Any]:
+        """Get user statistics"""
+        if not self.redis_manager.is_available():
+            return {}
+        
+        client = self.redis_manager.get_client()
+        if not client:
+            return {}
+        
+        try:
+            stats_key = self._get_user_stats_key(user_id)
+            stats = client.hgetall(stats_key)
+            
+            # Convert numeric values
+            if stats:
+                stats['total_searches'] = int(stats.get('total_searches', 0))
+                stats['avg_response_time'] = float(stats.get('avg_response_time', 0))
+                stats['last_results_count'] = int(stats.get('last_results_count', 0))
+            
+            return stats
+            
+        except Exception as e:
+            print(f"❌ Failed to get user stats: {e}")
+            return {}
+    
+    def save_user_preferences(self, user_id: str, preferences: Dict) -> bool:
+        """Save user preferences"""
+        if not self.redis_manager.is_available():
+            return False
+        
+        client = self.redis_manager.get_client()
+        if not client:
+            return False
+        
+        try:
+            prefs_key = self._get_user_preferences_key(user_id)
+            client.hset(prefs_key, mapping=preferences)
+            client.expire(prefs_key, self.default_ttl)
+            return True
+            
+        except Exception as e:
+            print(f"❌ Failed to save preferences: {e}")
+            return False
+    
+    def get_user_preferences(self, user_id: str) -> Dict:
+        """Get user preferences"""
+        if not self.redis_manager.is_available():
+            return {}
+        
+        client = self.redis_manager.get_client()
+        if not client:
+            return {}
+        
+        try:
+            prefs_key = self._get_user_preferences_key(user_id)
+            return client.hgetall(prefs_key)
+            
+        except Exception as e:
+            print(f"❌ Failed to get preferences: {e}")
+            return {}
+    
+    def get_popular_queries(self, limit: int = 10) -> List[Dict]:
+        """Get most popular queries across all users"""
+        if not self.redis_manager.is_available():
+            return []
+        
+        client = self.redis_manager.get_client()
+        if not client:
+            return []
+        
+        try:
+            # Get all user search keys
+            pattern = "user_searches:*"
+            user_keys = client.keys(pattern)
+            
+            query_counts = defaultdict(int)
+            
+            for key in user_keys:
+                searches = client.lrange(key, 0, -1)
+                for search_json in searches:
+                    search_data = json.loads(search_json)
+                    query = search_data.get('query', '').lower().strip()
+                    if query:
+                        query_counts[query] += 1
+            
+            # Sort by frequency
+            popular = sorted(query_counts.items(), key=lambda x: x[1], reverse=True)
+            
+            return [{"query": query, "count": count} for query, count in popular[:limit]]
+            
+        except Exception as e:
+            print(f"❌ Failed to get popular queries: {e}")
+            return []
+    
+    def clear_user_data(self, user_id: str) -> bool:
+        """Clear all data for a specific user"""
+        if not self.redis_manager.is_available():
+            return False
+        
+        client = self.redis_manager.get_client()
+        if not client:
+            return False
+        
+        try:
+            # Delete all user-related keys
+            keys_to_delete = [
+                self._get_user_searches_key(user_id),
+                self._get_user_preferences_key(user_id),
+                self._get_user_stats_key(user_id)
+            ]
+            
+            deleted_count = client.delete(*keys_to_delete)
+            print(f"✅ Cleared {deleted_count} keys for user: {user_id}")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Failed to clear user data: {e}")
+            return False
 
 class EnhancedCitationManager:
     """Fixed citation manager with proper clickable citations"""
@@ -707,7 +928,8 @@ class OptimizedRAGPipeline:
         self.citation_manager = EnhancedCitationManager()
         self.web_searcher = EnhancedTavilyWebSearcher(self.cache)
         self.doc_processor = OptimizedDocumentProcessor(self.cache)
-        
+        self.user_tracker = UserSearchTracker(self.redis_manager)
+
         # Lazy-loaded components
         self._embeddings = None
         self._llm = None
@@ -880,53 +1102,84 @@ class OptimizedRAGPipeline:
         return documents
     
     def _calculate_content_relevance(self, query: str, content: str) -> float:
-        """Enhanced relevance calculation using keyword matching and semantic similarity"""
+        """Enhanced relevance calculation optimized for parallel processing"""
         try:
+            # Cache common operations to avoid repeated work
             query_lower = query.lower()
             content_lower = content.lower()
             
+            # Use sets for faster intersection operations
+            query_words = set(query_lower.split())
+            content_words = set(content_lower.split())
+            
+            # Calculate word overlap score
+            keyword_overlap = len(query_words.intersection(content_words))
+            keyword_score = keyword_overlap / max(len(query_words), 1)
+            
+            # Calculate phrase matching score
             query_phrases = [phrase.strip() for phrase in query_lower.split() if len(phrase.strip()) > 2]
             phrase_matches = sum(1 for phrase in query_phrases if phrase in content_lower)
             phrase_score = phrase_matches / max(len(query_phrases), 1)
             
-            query_words = set(query_lower.split())
-            content_words = set(content_lower.split())
-            keyword_overlap = len(query_words.intersection(content_words))
-            keyword_score = keyword_overlap / max(len(query_words), 1)
+            # Calculate content length bonus (prefer substantial chunks)
+            length_bonus = min(len(content) / 1000, 0.2)  # Up to 20% bonus for longer content
             
-            final_score = (phrase_score * 0.7) + (keyword_score * 0.3)
+            # Weighted final score
+            final_score = (phrase_score * 0.6) + (keyword_score * 0.3) + length_bonus
             return min(final_score, 1.0)
             
-        except:
+        except Exception:
             return 0.0
     
     def _search_local_documents(self, query: str) -> List[Document]:
-        """Search local documents with enhanced relevance filtering"""
-        if not self.retriever:
+        """Search local documents with parallel chunk processing"""
+        if not self.default_retriever:
             return []
         
         try:
             # Get more candidates for better filtering
-            docs = self.retriever.invoke(query)
+            docs = self.default_retriever.invoke(query)
             
             if not docs:
                 return []
             
-            # Enhanced relevance filtering
-            scored_docs = []
-            for doc in docs:
+            # **PARALLEL PROCESSING OF DOCUMENT CHUNKS**
+            def calculate_relevance_for_doc(doc):
                 if len(doc.page_content.strip()) >= self.min_content_length:
                     relevance_score = self._calculate_content_relevance(query, doc.page_content)
-                    if relevance_score > 0.1:  # Very low threshold, let content quality decide
+                    if relevance_score > 0.1:
                         doc.metadata['relevance_score'] = relevance_score
                         doc.metadata['source_type'] = 'local'
-                        scored_docs.append(doc)
+                        return doc
+                return None
+            
+            # Use ThreadPoolExecutor for parallel relevance calculation
+            scored_docs = []
+            max_workers = min(8, len(docs))  # Limit concurrent threads
+            
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                # Submit all relevance calculations in parallel
+                future_to_doc = {
+                    executor.submit(calculate_relevance_for_doc, doc): doc 
+                    for doc in docs
+                }
+                
+                # Collect results as they complete
+                for future in as_completed(future_to_doc):
+                    try:
+                        result = future.result()
+                        if result is not None:
+                            scored_docs.append(result)
+                    except Exception as e:
+                        print(f"❌ Error processing document chunk: {e}")
+                        continue
             
             # Sort by relevance and return top results
             scored_docs.sort(key=lambda x: x.metadata.get('relevance_score', 0), reverse=True)
             return scored_docs[:self.top_k_local]
             
         except Exception as e:
+            print(f"❌ Local search error: {e}")
             return []
 
     def _search_web(self, query: str) -> List[Document]:
@@ -1069,8 +1322,7 @@ class OptimizedRAGPipeline:
         seen_hashes = set()
         
         for doc in documents:
-            #content_hash = hashlib.md5(doc.page_content[:200].encode()).hexdigest()
-            content_hash = hashlib.md5(result.content[:200]).hexdigest()
+            content_hash = hashlib.md5(doc.page_content[:200].encode()).hexdigest()
             if content_hash not in seen_hashes:
                 seen_hashes.add(content_hash)
                 unique_docs.append(doc)
