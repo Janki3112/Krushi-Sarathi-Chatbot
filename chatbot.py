@@ -2371,6 +2371,17 @@ def main():
     <style>
     .stApp {
         background-color: #f8f9fa;
+        color: #212529;  /* Dark gray text */
+        font-family: 'Segoe UI', sans-serif;
+    }
+    .stMarkdown, .stTextInput, .stTextArea, .stChatMessageContent {
+        color: #212529 !important;  /* Force readable text color */
+    }
+    .stChatMessageContent {
+        background-color: #ffffff;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        margin: 0.25rem 0;
     }
     .system-status {
         background-color: #e9ecef;
