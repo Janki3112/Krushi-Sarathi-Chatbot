@@ -2483,13 +2483,18 @@ def main():
         color: var(--text-secondary) !important;
     }
     
-    /* Select boxes */
-    /* Select boxes */
+    /* Style the select box */
     .stSelectbox > div > div > select {
-        background-color: #ffffff !important; /* Use solid white for clarity */
-        color: #212121 !important;           /* Use very dark text for contrast */
+        background-color: #fff !important;    /* White background for clarity */
+        color: #232323 !important;            /* Dark text for visibility */
         border: 1px solid #bbb !important;
         border-radius: 0.5rem !important;
+    }
+    
+    /* Style the dropdown options */
+    .stSelectbox > div > div > select option {
+        background-color: #fff !important;    /* Ensure dropdown items have a white background */
+        color: #232323 !important;            /* Ensure dropdown items have dark text */
     }
     
     /* Primary buttons */
