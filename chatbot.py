@@ -18,6 +18,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from docx import Document as DocxDocument
 from PyPDF2 import PdfReader
+import chromadb
 
 # Redis imports
 import concurrent
