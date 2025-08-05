@@ -18,7 +18,6 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from docx import Document as DocxDocument
 from PyPDF2 import PdfReader
-import chromadb
 
 # Redis imports
 import concurrent
@@ -46,7 +45,7 @@ from langchain_community.document_loaders import (
     PyPDFLoader, TextLoader, UnstructuredWordDocumentLoader,
     CSVLoader, UnstructuredExcelLoader, UnstructuredMarkdownLoader
 )
-from langchain_community.vectorstores import Chroma
+from langchain_community.vectorstores import 
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.documents import Document
 from sentence_transformers import SentenceTransformer
@@ -908,10 +907,10 @@ class OptimizedRAGPipeline:
         self.similarity_threshold = similarity_threshold
         self.min_content_length = min_content_length
 
-        self.vectorstore_client = chromadb.Client(chromadb.config.Settings(
-            chroma_db_impl="duckdb+parquet",
-            persist_directory=self.persist_directory
-        ))
+       # self.vectorstore_client = chromadb.Client(chromadb.config.Settings(
+       #     chroma_db_impl="duckdb+parquet",
+       #     persist_directory=self.persist_directory
+       # ))
                      
         # Initialize core components
         self.redis_manager = OptimizedRedisManager()
