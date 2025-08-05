@@ -1,4 +1,3 @@
-# enhanced_rag_pipeline_fixed.py - Fixed RAG Pipeline with Proper Integration
 import os
 import logging
 import warnings
@@ -1577,6 +1576,12 @@ class OptimizedRAGPipeline:
         """Process query with intelligent content prioritization and clickable citations"""
         start_time = time.time()
         
+        translator = get_translator()  # Get the global translator instance
+        if translator.is_casual_query(question):
+            casual_response = translator.get_casual_response(question, "en")  # Default to English
+            response_time = time.time() - start_time
+            return f"{casual_response}\n\n*(Response time: {response_time:.2f}s)*"
+
         try:
             relevant_docs = self._parallel_search(question)
             
@@ -1862,6 +1867,7 @@ class SessionManager:
         st.session_state.all_user_sessions[user_id][session_id]["last_updated"] = timestamp
         self.save_sessions()
 
+    #-------------------------------------------------------------------------------
 class TranslationHelper:
     """Handle multilingual translations"""
     
@@ -1882,6 +1888,144 @@ class TranslationHelper:
             "Bengali": "bn",
             "Punjabi": "pa"
         }
+    
+    # ADD THESE NEW METHODS TO YOUR EXISTING CLASS:
+    
+    def is_casual_query(self, query: str) -> bool:
+        """Detect if query is casual conversation vs information seeking"""
+        casual_patterns = [
+            r'\b(hi|hello|hey|hola|namaste)\b',
+            r'\bhow are you\b',
+            r'\bwho are you\b',
+            r'\bwhat are you\b',
+            r'\bhow can you help\b',
+            r'\bwhat can you do\b',
+            r'\bgood morning\b',
+            r'\bgood evening\b',
+            r'\bthanks?\b',
+            r'\bthank you\b',
+            r'\bbye\b',
+            r'\bgoodbye\b',
+            r'\bnice to meet you\b',
+            r'\bdhanyawad\b',
+            r'\bnamaskar\b'
+        ]
+        
+        query_lower = query.lower().strip()
+        
+        # Check for very short queries (likely casual)
+        if len(query_lower.split()) <= 2:
+            for pattern in casual_patterns:
+                if re.search(pattern, query_lower):
+                    return True
+        
+        # Check for longer casual patterns
+        for pattern in casual_patterns:
+            if re.search(pattern, query_lower):
+                return True
+                
+        return False
+    
+    def get_casual_responses(self) -> Dict[str, Dict[str, str]]:
+        """Get casual responses in all supported languages"""
+        return {
+            "en": {
+                "greeting": "Hello! I'm Krushi Sarthi, your agricultural assistant. How can I help you with farming or agriculture today?",
+                "how_are_you": "I'm doing great, thank you for asking! I'm here to help you with any questions about agriculture, farming, crops, or related topics.",
+                "who_are_you": "I'm Krushi Sarthi, an AI-powered agricultural assistant. I can help you with farming techniques, crop management, agricultural best practices, and answer questions using both local documents and web search.",
+                "help": "I can assist you with:\n• Farming techniques and best practices\n• Crop diseases and pest management\n• Soil health and fertilizers\n• Weather and seasonal advice\n• Market information\n• Government schemes for farmers\n\nJust ask me any agriculture-related question!",
+                "thanks": "You're welcome! Feel free to ask me anything about agriculture or farming.",
+                "bye": "Goodbye! Come back anytime you need help with farming or agriculture. Have a great day!",
+                "default": "Hello! I'm your agricultural assistant. How can I help you with farming today?"
+            },
+            "hi": {
+                "greeting": "नमस्ते! मैं कृषि सारथी हूं, आपका कृषि सहायक। आज मैं खेती या कृषि में आपकी कैसे मदद कर सकता हूं?",
+                "how_are_you": "मैं बहुत अच्छा हूं, पूछने के लिए धन्यवाद! मैं यहां कृषि, खेती, फसलों के बारे में आपके किसी भी सवाल में मदद करने के लिए हूं।",
+                "who_are_you": "मैं कृषि सारथी हूं, एक AI-संचालित कृषि सहायक। मैं खेती की तकनीकों, फसल प्रबंधन, कृषि की बेहतरीन प्रथाओं में मदद कर सकता हूं।",
+                "help": "मैं इन चीजों में आपकी मदद कर सकता हूं:\n• खेती की तकनीकें और बेस्ट प्रैक्टिसेज\n• फसल की बीमारियां और कीट प्रबंधन\n• मिट्टी का स्वास्थ्य और उर्वरक\n• मौसम और मौसमी सलाह\n• बाजार की जानकारी\n• किसानों के लिए सरकारी योजनाएं\n\nकृषि से जुड़ा कोई भी सवाल पूछें!",
+                "thanks": "आपका स्वागत है! कृषि या खेती के बारे में कुछ भी पूछने में संकोच न करें।",
+                "bye": "अलविदा! खेती या कृषि में मदद की जरूरत हो तो कभी भी आएं। आपका दिन शुभ हो!",
+                "default": "नमस्ते! मैं आपका कृषि सहायक हूं। आज खेती में कैसे मदद कर सकता हूं?"
+            },
+            "mr": {
+                "greeting": "नमस्कार! मी कृषी सारथी आहे, तुमचा कृषी सहाय्यक। आज मी तुम्हाला शेती किंवा कृषीमध्ये कशी मदत करू शकतो?",
+                "how_are_you": "मी खूप चांगला आहे, विचारल्याबद्दल धन्यवाद! मी येथे कृषी, शेती, पिकांविषयी तुमच्या कोणत्याही प्रश्नात मदत करण्यासाठी आहे.",
+                "who_are_you": "मी कृषी सारथी आहे, एक AI-चालित कृषी सहाय्यक. मी शेतीच्या तंत्रांमध्ये, पीक व्यवस्थापनात, कृषी सराव मध्ये मदत करू शकतो.",
+                "help": "मी या गोष्टींमध्ये तुमची मदत करू शकतो:\n• शेतीची तंत्रे आणि चांगल्या पद्धती\n• पिकांचे आजार आणि कीटक व्यवस्थापन\n• मातीचे आरोग्य आणि खते\n• हवामान आणि हंगामी सल्ला\n• बाजाराची माहिती\n• शेतकऱ्यांसाठी सरकारी योजना\n\nकृषीशी संबंधित कोणताही प्रश्न विचारा!",
+                "thanks": "तुमचे स्वागत आहे! कृषी किंवा शेतीविषयी काहीही विचारण्यास मोकळ्या मनाने या.",
+                "bye": "निरोप! शेती किंवा कृषीमध्ये मदत हवी असेल तर कधीही या. तुमचा दिवस चांगला जावो!",
+                "default": "नमस्कार! मी तुमचा कृषी सहाय्यक आहे. आज शेतीमध्ये कशी मदत करू शकतो?"
+            },
+            "gu": {
+                "greeting": "નમસ્તે! હું કૃષિ સારથી છું, તમારો કૃષિ સહાયક. આજે હું તમને ખેતી અથવા કૃષિમાં કેવી રીતે મદદ કરી શકું?",
+                "how_are_you": "હું ખૂબ સારો છું, પૂછવા બદલ આભાર! હું અહીં કૃષિ, ખેતી, પાકો વિશેના તમારા કોઈપણ પ્રશ્નોમાં મદદ કરવા માટે છું.",
+                "who_are_you": "હું કૃષિ સારથી છું, એક AI-સંચાલિત કૃષિ સહાયક. હું ખેતીની તકનીકો, પાક વ્યવસ્થાપન, કૃષિ શ્રેષ્ઠ પ્રથાઓમાં મદદ કરી શકું છું.",
+                "help": "હું આ બાબતોમાં તમારી મદદ કરી શકું છું:\n• ખેતીની તકનીકો અને શ્રેષ્ઠ પ્રથાઓ\n• પાકના રોગો અને જીવાત વ્યવસ્થાપન\n• માટીનું સ્વાસ્થ્ય અને ખાતર\n• હવામાન અને મોસમી સલાહ\n• બજારની માહિતી\n• ખેડૂતો માટે સરકારી યોજનાઓ\n\nકૃષિ સંબંધિત કોઈપણ પ્રશ્ન પૂછો!",
+                "thanks": "તમારું સ્વાગત છે! કૃષિ અથવા ખેતી વિશે કંઈપણ પૂછવામાં સંકોચ ન કરો.",
+                "bye": "વિદાય! ખેતી અથવા કૃષિમાં મદદની જરૂર હોય તો કોઈ પણ સમયે આવો. તમારો દિવસ સારો જાય!",
+                "default": "નમસ્તે! હું તમારો કૃષિ સહાયક છું. આજે ખેતીમાં કેવી રીતે મદદ કરી શકું?"
+            },
+            "ta": {
+                "greeting": "வணக்கம்! நான் கிருஷி சாரதி, உங்கள் விவசாய உதவியாளர். இன்று நான் விவசாயம் அல்லது வேளாண்மையில் உங்களுக்கு எப்படி உதவ முடியும்?",
+                "how_are_you": "நான் நன்றாக இருக்கிறேன், கேட்டதற்கு நன்றி! விவசாயம், வேளாண்மை, பயிர்கள் பற்றிய உங்கள் எந்த கேள்விகளுக்கும் நான் இங்கே உதவ இருக்கிறேன்.",
+                "who_are_you": "நான் கிருஷி சாரதி, AI-இயங்கும் விவசாய உதவியாளர். விவசாய நுட்பங்கள், பயிர் மேலாண்மை, வேளாண் சிறந்த நடைமுறைகளில் நான் உதவ முடியும்.",
+                "help": "நான் இந்த விஷயங்களில் உங்களுக்கு உதவ முடியும்:\n• விவசாய நுட்பங்கள் மற்றும் சிறந்த நடைமுறைகள்\n• பயிர் நோய்கள் மற்றும் பூச்சி மேலாண்மை\n• மண் ஆரோக்கியம் மற்றும் உரங்கள்\n• வானிலை மற்றும் பருவகால ஆலோசனை\n• சந்தை தகவல்\n• விவசாயிகளுக்கான அரசு திட்டங்கள்\n\nவேளாண்மை தொடர்பான எந்த கேள்வியும் கேளுங்கள்!",
+                "thanks": "வரவேற்கிறோம்! விவசாயம் அல்லது வேளாண்மை பற்றி எதையும் கேட்க தயங்க வேண்டாம்.",
+                "bye": "வணக்கம்! விவசாயம் அல்லது வேளாண்மையில் உதவி தேவைப்பட்டால் எப்போது வேண்டுமானாலும் வாருங்கள். உங்கள் நாள் நல்லதாக இருக்கட்டும்!",
+                "default": "வணக்கம்! நான் உங்கள் விவசாய உதவியாளர். இன்று விவசாயத்தில் எப்படி உதவ முடியும்?"
+            },
+            "te": {
+                "greeting": "నమస్కారం! నేను కృషి సారథి, మీ వ్యవసాయ సహాయకుడను. ఈ రోజు వ్యవసాయం లేదా కృషిలో నేను మీకు ఎలా సహాయం చేయగలను?",
+                "how_are_you": "నేను బాగున్నాను, అడిగినందుకు ధన్యవాదాలు! వ్యవసాయం, కృషి, పంటల గురించి మీ ఏ ప్రశ్నలకైనా సహాయం చేయడానికి నేను ఇక్కడ ఉన్నాను.",
+                "who_are_you": "నేను కృషి సారథి, AI-ఆధారిత వ్యవసాయ సహాయకుడను. వ్యవసాయ పద్ధతులు, పంట నిర్వహణ, వ్యవసాయ ఉత్తమ అభ్యాసాలలో నేను సహాయం చేయగలను.",
+                "help": "నేను ఈ విషయాలలో మీకు సహాయం చేయగలను:\n• వ్యవసాయ పద్ధతులు మరియు ఉత్తమ అభ్యాసాలు\n• పంట వ్యాధులు మరియు కీట నిర్వహణ\n• మట్టి ఆరోగ్యం మరియు ఎరువులు\n• వాతావరణం మరియు కాలానుగుణ సలహా\n• మార్కెట్ సమాచారం\n• రైతుల కోసం ప్రభుత్వ పథకాలు\n\nవ్యవసాయ సంబంధిత ఏ ప్రశ్న అయినా అడగండి!",
+                "thanks": "మీకు స్వాగతం! వ్యవసాయం లేదా కృషి గురించి ఏదైనా అడగడానికి సంకోచించకండి.",
+                "bye": "నమస్కారం! వ్యవసాయం లేదా కృషిలో సహాయం అవసరమైతే ఎప్పుడైనా రండి. మీ రోజు మంచిగా గడవాలి!",
+                "default": "నమస్కారం! నేను మీ వ్యవసాయ సహాయకుడను. ఈ రోజు వ్యవసాయంలో ఎలా సహాయం చేయగలను?"
+            },
+            "bn": {
+                "greeting": "নমস্কার! আমি কৃষি সারথি, আপনার কৃষি সহায়ক। আজ আমি কৃষি বা কৃষিকাজে আপনাকে কীভাবে সাহায্য করতে পারি?",
+                "how_are_you": "আমি খুবই ভালো আছি, জিজ্ঞাসা করার জন্য ধন্যবাদ! কৃষি, চাষাবাদ, ফসল সম্পর্কে আপনার যেকোনো প্রশ্নে সাহায্য করার জন্য আমি এখানে আছি।",
+                "who_are_you": "আমি কৃষি সারথি, একটি AI-চালিত কৃষি সহায়ক। আমি কৃষি কৌশল, ফসল ব্যবস্থাপনা, কৃষি সর্বোত্তম অনুশীলনে সাহায্য করতে পারি।",
+                "help": "আমি এই বিষয়গুলিতে আপনাকে সাহায্য করতে পারি:\n• কৃষি কৌশল এবং সর্বোত্তম অনুশীলন\n• ফসলের রোগ এবং পোকা ব্যবস্থাপনা\n• মাটির স্বাস্থ্য এবং সার\n• আবহাওয়া এবং মৌসুমী পরামর্শ\n• বাজারের তথ্য\n• কৃষকদের জন্য সরকারি প্রকল্প\n\nকৃষি সংক্রান্ত যেকোনো প্রশ্ন করুন!",
+                "thanks": "আপনাকে স্বাগতম! কৃষি বা চাষাবাদ সম্পর্কে যেকোনো কিছু জিজ্ঞাসা করতে দ্বিধা করবেন না।",
+                "bye": "বিদায়! কৃষি বা চাষাবাদে সাহায্যের প্রয়োজন হলে যেকোনো সময় আসুন। আপনার দিনটি ভালো কাটুক!",
+                "default": "নমস্কার! আমি আপনার কৃষি সহায়ক। আজ কৃষিকাজে কীভাবে সাহায্য করতে পারি?"
+            },
+            "pa": {
+                "greeting": "ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਕ੍ਰਿਸ਼ੀ ਸਾਰਥੀ ਹਾਂ, ਤੁਹਾਡਾ ਖੇਤੀਬਾੜੀ ਸਹਾਇਕ। ਅੱਜ ਮੈਂ ਖੇਤੀ ਜਾਂ ਖੇਤੀਬਾੜੀ ਵਿੱਚ ਤੁਹਾਡੀ ਕਿਵੇਂ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?",
+                "how_are_you": "ਮੈਂ ਬਹੁਤ ਚੰਗਾ ਹਾਂ, ਪੁੱਛਣ ਲਈ ਧੰਨਵਾਦ! ਮੈਂ ਇੱਥੇ ਖੇਤੀਬਾੜੀ, ਖੇਤੀ, ਫਸਲਾਂ ਬਾਰੇ ਤੁਹਾਡੇ ਕਿਸੇ ਵੀ ਸਵਾਲ ਦੀ ਮਦਦ ਲਈ ਹਾਂ।",
+                "who_are_you": "ਮੈਂ ਕ੍ਰਿਸ਼ੀ ਸਾਰਥੀ ਹਾਂ, ਇੱਕ AI-ਸੰਚਾਲਿਤ ਖੇਤੀਬਾੜੀ ਸਹਾਇਕ। ਮੈਂ ਖੇਤੀ ਦੀਆਂ ਤਕਨੀਕਾਂ, ਫਸਲ ਪ੍ਰਬੰਧਨ, ਖੇਤੀਬਾੜੀ ਦੀਆਂ ਵਧੀਆ ਪ੍ਰਥਾਵਾਂ ਵਿੱਚ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ।",
+                "help": "ਮੈਂ ਇਹਨਾਂ ਗੱਲਾਂ ਵਿੱਚ ਤੁਹਾਡੀ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ:\n• ਖੇਤੀ ਦੀਆਂ ਤਕਨੀਕਾਂ ਅਤੇ ਵਧੀਆ ਪ੍ਰਥਾਵਾਂ\n• ਫਸਲਾਂ ਦੀਆਂ ਬਿਮਾਰੀਆਂ ਅਤੇ ਕੀੜੇ-ਮਕੌੜੇ ਪ੍ਰਬੰਧਨ\n• ਮਿੱਟੀ ਦੀ ਸਿਹਤ ਅਤੇ ਖਾਦ\n• ਮੌਸਮ ਅਤੇ ਮੌਸਮੀ ਸਲਾਹ\n• ਮਾਰਕੀਟ ਦੀ ਜਾਣਕਾਰੀ\n• ਕਿਸਾਨਾਂ ਲਈ ਸਰਕਾਰੀ ਸਕੀਮਾਂ\n\nਖੇਤੀਬਾੜੀ ਨਾਲ ਜੁੜਿਆ ਕੋਈ ਵੀ ਸਵਾਲ ਪੁੱਛੋ!",
+                "thanks": "ਤੁਹਾਡਾ ਸਵਾਗਤ ਹੈ! ਖੇਤੀਬਾੜੀ ਜਾਂ ਖੇਤੀ ਬਾਰੇ ਕੁਝ ਵੀ ਪੁੱਛਣ ਵਿੱਚ ਸੰਕੋਚ ਨਾ ਕਰੋ।",
+                "bye": "ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਖੇਤੀਬਾੜੀ ਜਾਂ ਖੇਤੀ ਵਿੱਚ ਮਦਦ ਦੀ ਲੋੜ ਹੋਵੇ ਤਾਂ ਕਿਸੇ ਵੀ ਸਮੇਂ ਆਓ। ਤੁਹਾਡਾ ਦਿਨ ਚੰਗਾ ਰਹੇ!",
+                "default": "ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਤੁਹਾਡਾ ਖੇਤੀਬਾੜੀ ਸਹਾਇਕ ਹਾਂ। ਅੱਜ ਖੇਤੀ ਵਿੱਚ ਕਿਵੇਂ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?"
+            }
+        }
+    
+    def get_casual_response(self, query: str, lang_code: str = "en") -> str:
+        """Generate appropriate casual responses based on query and language"""
+        query_lower = query.lower().strip()
+        responses = self.get_casual_responses()
+        lang_responses = responses.get(lang_code, responses["en"])
+        
+        # Determine response type based on query content
+        if any(greeting in query_lower for greeting in ["hi", "hello", "hey", "namaste", "namaskar", "sat sri akal"]):
+            return lang_responses["greeting"]
+        elif "how are you" in query_lower or "कैसे हो" in query_lower or "कसे आहात" in query_lower:
+            return lang_responses["how_are_you"]
+        elif any(phrase in query_lower for phrase in ["who are you", "what are you", "तुम कौन हो", "तुम्ही कोण आहात"]):
+            return lang_responses["who_are_you"]
+        elif any(phrase in query_lower for phrase in ["help", "can you do", "मदद", "સહાય", "உதவி"]):
+            return lang_responses["help"]
+        elif any(phrase in query_lower for phrase in ["thank", "thanks", "धन्यवाद", "धन्यावाद"]):
+            return lang_responses["thanks"]
+        elif any(phrase in query_lower for phrase in ["bye", "goodbye", "अलविदा", "निरोप"]):
+            return lang_responses["bye"]
+        else:
+            return lang_responses["default"]
+
+    # KEEP ALL YOUR EXISTING METHODS (translate_text, get_ui_text) AS THEY ARE
     
     def translate_text(self, text: str, target_lang: str) -> str:
         """Translate text to target language"""
@@ -2163,14 +2307,18 @@ def enhanced_chatbot_interface():
             
             # Get assistant response
             with st.chat_message("assistant"):
-                with st.spinner(translator.get_ui_text("searching", lang_code)):
-                    # Translate query to English if needed
-                    english_query = prompt
-                    if lang_code != "en" and translator.translator:
-                        try:
-                            english_query = translator.translator.translate(prompt, dest="en").text
-                        except:
-                            pass
+                response = ""
+
+                if translator.is_casual_query(prompt):
+                    response = translator.get_casual_response(prompt, lang_code)
+                else:
+                    with st.spinner(translator.get_ui_text("searching", lang_code)):                 
+                        english_query = prompt
+                        if lang_code != "en" and translator.translator:
+                            try:
+                                english_query = translator.translator.translate(prompt, dest="en").text
+                            except:
+                                english_query = prompt
                     
                     # Get response from pipeline
                     pipeline = get_pipeline_instance()
