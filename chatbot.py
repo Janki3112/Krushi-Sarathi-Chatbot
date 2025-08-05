@@ -102,7 +102,7 @@ class SearchResult:
     metadata: Dict[str, Any]
     relevance_score: float = 0.0
 
-DEFAULT_DOCS_FOLDER = r"C:\\Users\\vaish\\Desktop\\Ready Chatbot\\doc" 
+DEFAULT_DOCS_FOLDER = os.path.join(os.path.dirname(__file__), "doc")
 
 class OptimizedRedisManager:
     """Fixed Redis connection manager with proper error handling"""
