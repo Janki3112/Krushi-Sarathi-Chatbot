@@ -2351,6 +2351,7 @@ def enhanced_chatbot_interface():
                     response
                 )
 
+
 def main():
     """Main function with enhanced error handling"""
     if not STREAMLIT_AVAILABLE:
@@ -2369,20 +2370,59 @@ def main():
     # Custom CSS
     st.markdown("""
     <style>
+    /* Main App Background & Font */
     .stApp {
         background-color: #f8f9fa;
         color: #212529;  /* Dark gray text */
         font-family: 'Segoe UI', sans-serif;
     }
-    .st.markdown .stTextInput, .stTextArea .stChatMessageContent{
-        color: #000000 !important;  /* Force readable text color */
+
+    /* General text elements */
+    .stMarkdown, .stTextInput, .stTextArea, .stChatMessageContent {
+        color: #000000 !important;  /* Force visible black text */
     }
+
+    /* Chat message styling */
     .stChatMessageContent {
         background-color: #ffffff;
         border-radius: 0.5rem;
         padding: 0.75rem;
         margin: 0.25rem 0;
+        color: #000000 !important;
     }
+
+    /* Info box (e.g., welcome message) */
+    .stAlert[data-testid="stAlert-info"] {
+        background-color: #e2f0fb;
+        color: #0c2e4e;
+        font-weight: 500;
+    }
+
+    /* Sidebar background and text */
+    section[data-testid="stSidebar"] {
+        background-color: #f0f2f6;  /* Light gray sidebar */
+        color: #212529;             /* Dark text */
+    }
+
+    /* Sidebar titles and markdown text */
+    section[data-testid="stSidebar"] .css-1v0mbdj, 
+    section[data-testid="stSidebar"] .stMarkdown {
+        color: #212529 !important;
+    }
+
+    /* Sidebar buttons */
+    section[data-testid="stSidebar"] button {
+        color: #000000 !important;
+        background-color: #e0e0e0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    /* Sidebar button hover */
+    section[data-testid="stSidebar"] button:hover {
+        background-color: #d0d0d0;
+    }
+
     .system-status {
         background-color: #e9ecef;
         padding: 1rem;
