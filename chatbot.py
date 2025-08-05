@@ -2468,50 +2468,7 @@ def main():
         border-color: var(--accent-color) !important;
         transform: translateY(-1px) !important;
     }
-    #-----------------------------------------------------------
-    /* Language Selector Fix - Add this to your CSS */
-    section[data-testid="stSidebar"] .stSelectbox > div > div > select,
-    section[data-testid="stSidebar"] .stSelectbox select,
-    .stSelectbox > div > div > select {
-        background-color: #ffffff !important;
-        color: #1e293b !important;
-        border: 2px solid #e2e8f0 !important;
-        border-radius: 0.5rem !important;
-        padding: 0.75rem !important;
-        font-size: 1rem !important;
-        font-weight: 500 !important;
-        width: 100% !important;
-        appearance: none !important;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
-        background-position: right 0.5rem center !important;
-        background-repeat: no-repeat !important;
-        background-size: 1.5em 1.5em !important;
-        padding-right: 2.5rem !important;
-    }
-    
-    /* Language selector options */
-    section[data-testid="stSidebar"] .stSelectbox option,
-    .stSelectbox option {
-        background-color: #ffffff !important;
-        color: #1e293b !important;
-        padding: 0.5rem !important;
-    }
-    
-    /* Language selector hover state */
-    section[data-testid="stSidebar"] .stSelectbox > div > div > select:hover,
-    .stSelectbox > div > div > select:hover {
-        border-color: #10b981 !important;
-        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
-    }
-    
-    /* Language selector focus state */
-    section[data-testid="stSidebar"] .stSelectbox > div > div > select:focus,
-    .stSelectbox > div > div > select:focus {
-        outline: none !important;
-        border-color: #10b981 !important;
-        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
-    }
-    #-----------------------------------------------------------
+
     /* Text inputs */
     .stTextInput > div > div > input {
         background-color: var(--primary-bg) !important;
@@ -2527,11 +2484,9 @@ def main():
     }
     
     /* Select boxes */
-    .stSelectbox > div > div > select {
+    .stSelectbox select option {
         background-color: var(--primary-bg) !important;
         color: var(--text-primary) !important;
-        border: 1px solid var(--border-color) !important;
-        border-radius: 0.5rem !important;
     }
     
     /* Primary buttons */
