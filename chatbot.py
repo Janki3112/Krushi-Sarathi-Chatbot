@@ -91,7 +91,7 @@ TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY")
 REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.environ.get("REDIS_PORT", "6379"))
 REDIS_PASSWORD = None #os.environ.get("REDIS_PASSWORD")
-REDIS_DB = int(os.environ.get("REDIS_DB", "0"))
+REDIS = int(os.environ.get("REDIS", "0"))
 
 from dataclasses import dataclass
 @dataclass
@@ -112,7 +112,7 @@ class OptimizedRedisManager:
         host: str = REDIS_HOST,
         port: int = REDIS_PORT,
         password: Optional[str] = REDIS_PASSWORD,
-        db: int = REDIS_DB,
+        db: int = REDIS,
     ):
         self.host = host
         self.port = port
@@ -122,37 +122,23 @@ class OptimizedRedisManager:
         self._initialize_connection()
 
     def _initialize_connection(self):
-        """Initialize Redis connection with proper error handling"""
         try:
-            # Create connection pool
-            pool_kwargs = {
-                'host': self.host,
-                'port': self.port,
-                'db': self.db,
-                'max_connections': 20,
-                'retry_on_timeout': True,
-                'health_check_interval': 30,
-                'socket_connect_timeout': 5,
-                'socket_timeout': 5,
-            }
-            
-            if self.password:
-                pool_kwargs['password'] = self.password
-                
-            self.pool = redis.ConnectionPool(**pool_kwargs)
-            self.redis_client = redis.Redis(
-                connection_pool=self.pool,
-                decode_responses=True
-            )
-            
-            # Test connection
+            redis_url = os.getenv("REDIS_URL")
+            if redis_url:
+                self.redis_client = redis.from_url(redis_url, decode_responses=True)
+            else:
+                self.redis_client = redis.Redis(
+                    host=self.host,
+                    port=self.port,
+                    password=self.password,
+                    decode_responses=True
+                )
             self.redis_client.ping()
-            print("✅ Redis connection established successfully")
-            
+            print("✅ Redis connected")
         except Exception as e:
-            print(f"❌ Redis connection failed: {e}")
-            print("💡 Running in fallback mode without Redis caching")
+            print(f"❌ Redis error: {e}")
             self.redis_client = None
+
 
     def get_client(self) -> Optional[redis.Redis]:
         """Get Redis client with health check"""
@@ -920,7 +906,12 @@ class OptimizedRAGPipeline:
         self.top_k_web = top_k_web
         self.similarity_threshold = similarity_threshold
         self.min_content_length = min_content_length
-        
+
+        self.vectorstore_client = chromadb.Client(chromadb.config.Settings(
+            chroma_db_impl="duckdb+parquet",
+            persist_directory=self.persist_directory
+        ))
+                     
         # Initialize core components
         self.redis_manager = OptimizedRedisManager()
         self.cache = UnifiedCache(self.redis_manager)
