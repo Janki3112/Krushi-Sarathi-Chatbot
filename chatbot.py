@@ -2484,9 +2484,12 @@ def main():
     }
     
     /* Select boxes */
-    .stSelectbox select option {
-        background-color: var(--primary-bg) !important;
-        color: var(--text-primary) !important;
+    /* Select boxes */
+    .stSelectbox > div > div > select {
+        background-color: #ffffff !important; /* Use solid white for clarity */
+        color: #212121 !important;           /* Use very dark text for contrast */
+        border: 1px solid #bbb !important;
+        border-radius: 0.5rem !important;
     }
     
     /* Primary buttons */
