@@ -1,3 +1,4 @@
+# enhanced_rag_pipeline_fixed.py - Fixed RAG Pipeline with Proper Integration
 import os
 import logging
 import warnings
@@ -2354,7 +2355,6 @@ def main():
     """Main function with enhanced error handling"""
     if not STREAMLIT_AVAILABLE:
         print("❌ Streamlit not available. Running in CLI mode...")
-        # Add CLI interface here if needed
         return
     
     # Configure Streamlit page
@@ -2365,25 +2365,75 @@ def main():
         initial_sidebar_state="expanded"
     )
     
-    # Custom CSS
+    # ADD THIS CSS TO FORCE TEXT VISIBILITY
     st.markdown("""
     <style>
+    /* Force text visibility and proper rendering */
     .stApp {
-        background-color: #f8f9fa;
+        background-color: #ffffff !important;
+        color: #000000 !important;
     }
-    .system-status {
-        background-color: #e9ecef;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        margin: 1rem 0;
+    
+    .stMarkdown, .stText, p, div, span {
+        color: #000000 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
     }
-    .citation-link {
-        text-decoration: none;
-        color: #1f77b4;
-        font-weight: bold;
+    
+    /* Chat message styling */
+    .stChatMessage {
+        background-color: #f8f9fa !important;
+        color: #000000 !important;
+        border: 1px solid #dee2e6 !important;
     }
-    .citation-link:hover {
-        text-decoration: underline;
+    
+    /* Input field styling */
+    .stTextInput > div > div > input {
+        color: #000000 !important;
+        background-color: #ffffff !important;
+    }
+    
+    /* Selectbox styling */
+    .stSelectbox > div > div > select {
+        color: #000000 !important;
+        background-color: #ffffff !important;
+    }
+    
+    /* Button styling */
+    .stButton > button {
+        color: #000000 !important;
+        background-color: #ffffff !important;
+        border: 1px solid #dee2e6 !important;
+    }
+    
+    /* Sidebar styling */
+    .css-1d391kg {
+        background-color: #f8f9fa !important;
+        color: #000000 !important;
+    }
+    
+    /* Force markdown content visibility */
+    .stMarkdown > div {
+        color: #000000 !important;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    }
+    
+    /* Chat input styling */
+    .stChatInput > div > div > div > div {
+        color: #000000 !important;
+        background-color: #ffffff !important;
+    }
+    
+    /* Spinner styling */
+    .stSpinner > div {
+        color: #000000 !important;
+    }
+    
+    /* Force all text elements to be visible */
+    * {
+        -webkit-text-fill-color: initial !important;
+        color: #000000 !important;
     }
     </style>
     """, unsafe_allow_html=True)
