@@ -1,4 +1,3 @@
-# enhanced_rag_pipeline_fixed.py - Fixed RAG Pipeline with Proper Integration
 import os
 import logging
 import warnings
@@ -2482,21 +2481,47 @@ def main():
     .stTextInput > div > div > input::placeholder {
         color: var(--text-secondary) !important;
     }
-    
-    /* Style the select box */
+
+    /* Style the select box - Enhanced visibility */
     .stSelectbox > div > div > select {
-        background-color: #fff !important;    /* White background for clarity */
-        color: #232323 !important;            /* Dark text for visibility */
-        border: 1px solid #bbb !important;
+        background-color: #ffffff !important;    /* Pure white background */
+        color: #1a1a1a !important;              /* Dark text for maximum contrast */
+        border: 2px solid #d1d5db !important;   /* Stronger border */
         border-radius: 0.5rem !important;
+        padding: 0.75rem !important;
+        font-size: 1rem !important;
+        font-weight: 500 !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
     }
     
-    /* Style the dropdown options */
+    /* Style the dropdown when focused/active */
+    .stSelectbox > div > div > select:focus {
+        border-color: #10b981 !important;       /* Green accent when focused */
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+    }
+    
+    /* Style the dropdown options - Critical fix */
     .stSelectbox > div > div > select option {
-        background-color: #fff !important;    /* Ensure dropdown items have a white background */
-        color: #232323 !important;            /* Ensure dropdown items have dark text */
+        background-color: #ffffff !important;   /* White background for options */
+        color: #1a1a1a !important;             /* Dark text for options */
+        padding: 0.5rem !important;
+        font-size: 1rem !important;
+        font-weight: 500 !important;
     }
     
+    /* Additional fix for selectbox container */
+    .stSelectbox > div > div {
+        background-color: #ffffff !important;
+    }
+    
+    /* Fix for selectbox label */
+    .stSelectbox > label {
+        color: #1e293b !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.5rem !important;
+    }
+        
     /* Primary buttons */
     .stButton > button[kind="primary"] {
         background-color: var(--accent-color) !important;
