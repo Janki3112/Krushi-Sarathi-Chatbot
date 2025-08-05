@@ -2482,113 +2482,139 @@ def main():
         color: var(--text-secondary) !important;
     }
     
-    /* Force remove all Streamlit default dropdown styling */
-.stSelectbox, .stSelectbox * {
-    all: unset !important;
-}
-
-/* Rebuild selectbox from scratch with session button styling */
-.stSelectbox {
-    display: block !important;
-    width: 100% !important;
-    margin-bottom: 1rem !important;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-}
-
-/* Label styling */
-.stSelectbox > label {
-    display: block !important;
-    color: var(--text-primary) !important;
-    font-weight: 600 !important;
-    font-size: 1rem !important;
-    margin-bottom: 0.5rem !important;
-    line-height: 1.5 !important;
-}
-
-/* Container div styling */
-.stSelectbox > div {
-    position: relative !important;
-    width: 100% !important;
-}
-
-/* Inner container */
-.stSelectbox > div > div {
-    position: relative !important;
-    width: 100% !important;
-    background-color: var(--primary-bg) !important;
-    border: 1px solid var(--border-color) !important;
-    border-radius: 0.5rem !important;
-    box-shadow: var(--shadow) !important;
-}
-
-/* The actual select element - match session buttons exactly */
-.stSelectbox > div > div > select {
-    display: block !important;
-    width: 100% !important;
-    background-color: var(--primary-bg) !important;
-    color: var(--text-primary) !important;
-    border: 1px solid var(--border-color) !important;
-    border-radius: 0.5rem !important;
-    padding: 0.5rem 2rem 0.5rem 1rem !important;  /* Extra right padding for arrow */
-    font-weight: 500 !important;
-    font-size: 1rem !important;
-    font-family: inherit !important;
-    line-height: 1.5 !important;
-    box-shadow: var(--shadow) !important;
-    transition: all 0.2s ease !important;
-    cursor: pointer !important;
+        /* Force remove all Streamlit default dropdown styling */
+    .stSelectbox, .stSelectbox * {
+        all: unset !important;
+    }
     
-    /* Remove default browser styling */
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    background-image: none !important;
-}
-
-/* Hover state - exactly like session buttons */
-.stSelectbox > div > div > select:hover {
-    background-color: var(--hover-bg) !important;
-    border-color: var(--accent-color) !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Focus state */
-.stSelectbox > div > div > select:focus {
-    outline: none !important;
-    border-color: var(--accent-color) !important;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1), var(--shadow) !important;
-}
-
-/* Custom dropdown arrow */
-.stSelectbox > div > div::after {
-    content: "▼" !important;
-    position: absolute !important;
-    right: 12px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    pointer-events: none !important;
-    color: var(--text-secondary) !important;
-    font-size: 12px !important;
-    z-index: 1 !important;
-}
-
-/* CRITICAL: Force dropdown options styling with maximum specificity */
-.stSelectbox > div > div > select option,
-select[data-baseweb="select"] option,
-[role="option"] {
-    background-color: #ffffff !important;
-    color: #1e293b !important;
-    padding: 8px 12px !important;
-    font-size: 1rem !important;
-    font-weight: 500 !important;
-    font-family: inherit !important;
-    border: none !important;
-    margin: 0 !important;
-    line-height: 1.5 !important;
-}
-
-
+    /* Rebuild selectbox from scratch with session button styling */
+    .stSelectbox {
+        display: block !important;
+        width: 100% !important;
+        margin-bottom: 1rem !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+    
+    /* Label styling */
+    .stSelectbox > label {
+        display: block !important;
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        margin-bottom: 0.5rem !important;
+        line-height: 1.5 !important;
+    }
+    
+    /* Container div styling */
+    .stSelectbox > div {
+        position: relative !important;
+        width: 100% !important;
+    }
+    
+    /* Inner container */
+    .stSelectbox > div > div {
+        position: relative !important;
+        width: 100% !important;
+        background-color: var(--primary-bg) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 0.5rem !important;
+        box-shadow: var(--shadow) !important;
+    }
+    
+    /* The actual select element - match session buttons exactly */
+    .stSelectbox > div > div > select {
+        display: block !important;
+        width: 100% !important;
+        background-color: var(--primary-bg) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 0.5rem !important;
+        padding: 0.5rem 2rem 0.5rem 1rem !important;  /* Extra right padding for arrow */
+        font-weight: 500 !important;
+        font-size: 1rem !important;
+        font-family: inherit !important;
+        line-height: 1.5 !important;
+        box-shadow: var(--shadow) !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+        
+        /* Remove default browser styling */
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        background-image: none !important;
+    }
+    
+    /* Hover state - exactly like session buttons */
+    .stSelectbox > div > div > select:hover {
+        background-color: var(--hover-bg) !important;
+        border-color: var(--accent-color) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Focus state */
+    .stSelectbox > div > div > select:focus {
+        outline: none !important;
+        border-color: var(--accent-color) !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1), var(--shadow) !important;
+    }
+    
+    /* Custom dropdown arrow */
+    .stSelectbox > div > div::after {
+        content: "▼" !important;
+        position: absolute !important;
+        right: 12px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        pointer-events: none !important;
+        color: var(--text-secondary) !important;
+        font-size: 12px !important;
+        z-index: 1 !important;
+    }
+    
+    /* CRITICAL: Force dropdown options styling with maximum specificity */
+    .stSelectbox > div > div > select option,
+    select[data-baseweb="select"] option,
+    [role="option"] {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+        padding: 8px 12px !important;
+        font-size: 1rem !important;
+        font-weight: 500 !important;
+        font-family: inherit !important;
+        border: none !important;
+        margin: 0 !important;
+        line-height: 1.5 !important;
+    }
+    /* Alternative styling for options */
+    .stSelectbox > div > div > select option:hover,
+    .stSelectbox > div > div > select option:focus {
+        background-color: var(--hover-bg) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* Sidebar specific overrides with highest specificity */
+    section[data-testid="stSidebar"] .stSelectbox > div > div > select {
+        background: #ffffff !important;
+        color: #1e293b !important;
+        border: 1px solid #d1d5db !important;
+    }
+    
+    section[data-testid="stSidebar"] .stSelectbox > div > div > select option {
+        background: #ffffff !important;
+        color: #1e293b !important;
+    }
+    
+    /* Force all text in selectbox to be visible */
+    .stSelectbox *, 
+    section[data-testid="stSidebar"] .stSelectbox * {
+        color: var(--text-primary) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    
         
     /* Primary buttons */
     .stButton > button[kind="primary"] {
