@@ -906,7 +906,7 @@ class OptimizedRAGPipeline:
     def __init__(self, 
                  docs_folder: str = DEFAULT_DOCS_FOLDER,
                  embedding_model: str = "all-MiniLM-L6-v2",
-                 persist_directory: str = "./rag_vectorstore",
+                 persist_directory: str = "./rag_vectorstore_db",
                  top_k_local: int = 4,
                  top_k_web: int = 4,
                  similarity_threshold: float = 0.3,
