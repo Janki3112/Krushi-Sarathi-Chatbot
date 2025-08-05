@@ -2374,11 +2374,8 @@ def main():
         color: #212529;  /* Dark gray text */
         font-family: 'Segoe UI', sans-serif;
     }
-    .st.markdown .stTextInput, .stTextArea {
-        color: #ffc0cb !important;  /* Force readable text color */
-    }
-    .stChatMessageContent {
-        color: #ffc0cb;
+    .st.markdown .stTextInput, .stTextArea .stChatMessageContent{
+        color: #000000 !important;  /* Force readable text color */
     }
     .stChatMessageContent {
         background-color: #ffffff;
