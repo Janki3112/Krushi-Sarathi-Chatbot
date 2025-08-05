@@ -2481,42 +2481,6 @@ def main():
     .stTextInput > div > div > input::placeholder {
         color: var(--text-secondary) !important;
     }
-
-       /* Language Dropdown Styling (Light + Dark mode aware) */
-    .stSelectbox select,
-    section[data-testid="stSidebar"] select {
-        background-color: var(--primary-bg) !important;
-        color: var(--text-primary) !important;
-        border: 1px solid var(--border-color) !important;
-        border-radius: 0.5rem !important;
-        padding: 0.5rem 2.5rem 0.5rem 0.75rem !important;
-        font-size: 1rem !important;
-        font-weight: 500 !important;
-        appearance: none !important;
-        -webkit-appearance: none !important;
-        -moz-appearance: none !important;
-        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%22292%22%20height%3D%22182%22%20viewBox%3D%220%200%20292%20182%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20fill%3D%22%23cbd5e1%22%20d%3D%22M287%206l-135%20135L17%206c-9-9-23-9-32%200s-9%2023%200%2032l150%20150c9%209%2023%209%2032%200l150-150c9-9%209-23%200-32s-23-9-32%200z%22/%3E%3C/svg%3E") !important;
-        background-repeat: no-repeat !important;
-        background-position: right 0.75rem center !important;
-        background-size: 0.65rem !important;
-        cursor: pointer !important;
-        transition: all 0.2s ease !important;
-    }
-    
-    /* Hover effect */
-    .stSelectbox select:hover,
-    section[data-testid="stSidebar"] select:hover {
-        border-color: var(--accent-color) !important;
-        background-color: var(--hover-bg) !important;
-    }
-    
-    /* Disabled dropdown */
-    .stSelectbox select:disabled {
-        background-color: #e5e7eb !important;
-        color: #9ca3af !important;
-        cursor: not-allowed !important;
-    }
-
         
     /* Primary buttons */
     .stButton > button[kind="primary"] {
