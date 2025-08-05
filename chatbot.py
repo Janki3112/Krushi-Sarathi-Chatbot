@@ -2482,6 +2482,32 @@ def main():
         color: var(--text-secondary) !important;
     }
     
+    /* Alternative styling for options */
+    .stSelectbox > div > div > select option:hover,
+    .stSelectbox > div > div > select option:focus {
+        background-color: var(--hover-bg) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* Sidebar specific overrides with highest specificity */
+    section[data-testid="stSidebar"] .stSelectbox > div > div > select {
+        background: #ffffff !important;
+        color: #1e293b !important;
+        border: 1px solid #d1d5db !important;
+    }
+    
+    section[data-testid="stSidebar"] .stSelectbox > div > div > select option {
+        background: #ffffff !important;
+        color: #1e293b !important;
+    }
+    
+    /* Force all text in selectbox to be visible */
+    .stSelectbox *, 
+    section[data-testid="stSidebar"] .stSelectbox * {
+        color: var(--text-primary) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
 
         
     /* Primary buttons */
