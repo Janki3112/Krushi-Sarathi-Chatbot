@@ -2177,7 +2177,6 @@ def get_translator():
     if _translator is None:
         _translator = TranslationHelper()
     return _translator
-
 def enhanced_chatbot_interface():
     """Enhanced Streamlit chatbot interface with multilingual support and session management"""
     
@@ -2392,9 +2391,21 @@ def main():
         line-height: 1.6;
     }
     
-    /* Global text color fixes */
-    .stApp, .stApp * {
+    /* Global text color fixes - More specific */
+    .stApp {
         color: var(--text-primary) !important;
+    }
+    
+    /* General text elements */
+    .stMarkdown, .stMarkdown p, .stMarkdown div, .stMarkdown span,
+    .stTextInput, .stTextArea, .stChatMessageContent,
+    p, div, span, label {
+        color: var(--text-primary) !important;
+    }
+    
+    /* Force visibility for all text content */
+    * {
+        visibility: visible !important;
     }
     
     /* Main content area */
@@ -2550,29 +2561,69 @@ def main():
         color: var(--text-secondary) !important;
     }
     
-    /* Alert messages */
+    /* Alert messages - Enhanced visibility */
     .stAlert {
-        border-radius: 0.5rem !important;
-        border: none !important;
-        box-shadow: var(--shadow) !important;
+        border-radius: 0.75rem !important;
+        border: 2px solid transparent !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        margin: 1rem 0 !important;
+        font-weight: 500 !important;
     }
     
-    .stAlert[data-testid="stAlert-info"] {
+    /* Info Alert - Welcome message */
+    .stAlert[data-testid="stAlert-info"],
+    .stAlert[data-testid="stAlert-info"] div,
+    .stAlert[data-testid="stAlert-info"] p,
+    .stAlert[data-testid="stAlert-info"] span {
         background-color: #dbeafe !important;
         color: #1e40af !important;
-        border-left: 4px solid #3b82f6 !important;
+        border: 2px solid #3b82f6 !important;
+        border-left: 6px solid #3b82f6 !important;
+        font-size: 1.1rem !important;
+        line-height: 1.6 !important;
+        padding: 1.25rem !important;
+    }
+    
+    /* Force text color in info alerts */
+    .stAlert[data-testid="stAlert-info"] * {
+        color: #1e40af !important;
+        background-color: transparent !important;
     }
     
     .stAlert[data-testid="stAlert-success"] {
         background-color: #dcfce7 !important;
         color: #166534 !important;
-        border-left: 4px solid var(--accent-color) !important;
+        border: 2px solid var(--accent-color) !important;
+        border-left: 6px solid var(--accent-color) !important;
+        padding: 1.25rem !important;
+    }
+    
+    .stAlert[data-testid="stAlert-success"] * {
+        color: #166534 !important;
+        background-color: transparent !important;
     }
     
     .stAlert[data-testid="stAlert-error"] {
         background-color: #fef2f2 !important;
         color: #dc2626 !important;
-        border-left: 4px solid #ef4444 !important;
+        border: 2px solid #ef4444 !important;
+        border-left: 6px solid #ef4444 !important;
+        padding: 1.25rem !important;
+    }
+    
+    .stAlert[data-testid="stAlert-error"] * {
+        color: #dc2626 !important;
+        background-color: transparent !important;
+    }
+    
+    /* Additional fix for info message content */
+    .stAlert .stMarkdown,
+    .stAlert .stMarkdown p,
+    .stAlert .stMarkdown div {
+        color: inherit !important;
+        background-color: transparent !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
     
     /* Spinner */
@@ -2649,8 +2700,45 @@ def main():
         background: #cbd5e1;
     }
     
-    /* Responsive design */
-    @media (max-width: 768px) {
+    /* Welcome message and info display fix */
+    [data-testid="stAlert-info"] {
+        background-color: #dbeafe !important;
+        border: 2px solid #3b82f6 !important;
+        border-left: 6px solid #3b82f6 !important;
+        border-radius: 0.75rem !important;
+        padding: 1.5rem !important;
+        margin: 1.5rem 0 !important;
+        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.15) !important;
+    }
+    
+    [data-testid="stAlert-info"] > div,
+    [data-testid="stAlert-info"] p,
+    [data-testid="stAlert-info"] span,
+    [data-testid="stAlert-info"] .stMarkdown,
+    [data-testid="stAlert-info"] .stMarkdown p,
+    [data-testid="stAlert-info"] .stMarkdown div {
+        color: #1e40af !important;
+        background-color: transparent !important;
+        font-size: 1.1rem !important;
+        font-weight: 500 !important;
+        line-height: 1.6 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* Additional fallback for welcome message */
+    .stAlert[data-testid="stAlert-info"]:before {
+        content: "";
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background-color: #3b82f6;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+        vertical-align: middle;
+    }
         .main .block-container {
             padding: 1rem 0.5rem;
         }
