@@ -2378,7 +2378,7 @@ def main():
         color: #ffc0cb !important;  /* Force readable text color */
     }
     .stChatMessageContent {
-        color: #212529;
+        color: #ffc0cb;
     }
     .stChatMessageContent {
         background-color: #ffffff;
