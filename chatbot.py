@@ -2481,45 +2481,90 @@ def main():
     .stTextInput > div > div > input::placeholder {
         color: var(--text-secondary) !important;
     }
-
-    /* Style the select box - Enhanced visibility */
+    
+    /* Force dropdown container styling to match session buttons */
+    .stSelectbox {
+        margin-bottom: 1rem !important;
+    }
+    
+    /* Main selectbox styling - matching session button appearance */
     .stSelectbox > div > div > select {
-        background-color: #ffffff !important;    /* Pure white background */
-        color: #1a1a1a !important;              /* Dark text for maximum contrast */
-        border: 2px solid #d1d5db !important;   /* Stronger border */
-        border-radius: 0.5rem !important;
-        padding: 0.75rem !important;
+        background-color: var(--primary-bg) !important;  /* Use same bg as session buttons */
+        color: var(--text-primary) !important;           /* Use same text color */
+        border: 1px solid var(--border-color) !important; /* Same border as session buttons */
+        border-radius: 0.5rem !important;                /* Same border radius */
+        padding: 0.5rem 1rem !important;                 /* Same padding as session buttons */
+        font-weight: 500 !important;                     /* Same font weight */
         font-size: 1rem !important;
-        font-weight: 500 !important;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+        box-shadow: var(--shadow) !important;            /* Same shadow as session buttons */
+        transition: all 0.2s ease !important;            /* Same transition */
+        width: 100% !important;
+        appearance: none !important;                      /* Remove default browser styling */
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
     }
     
-    /* Style the dropdown when focused/active */
+    /* Hover state - matching session buttons */
+    .stSelectbox > div > div > select:hover {
+        background-color: var(--hover-bg) !important;    /* Same hover bg as session buttons */
+        border-color: var(--accent-color) !important;    /* Same hover border */
+        transform: translateY(-1px) !important;          /* Same hover transform */
+    }
+    
+    /* Focus state */
     .stSelectbox > div > div > select:focus {
-        border-color: #10b981 !important;       /* Green accent when focused */
         outline: none !important;
-        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+        border-color: var(--accent-color) !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1), var(--shadow) !important;
     }
     
-    /* Style the dropdown options - Critical fix */
+    /* CRITICAL FIX: Force dropdown options to have proper styling */
     .stSelectbox > div > div > select option {
-        background-color: #ffffff !important;   /* White background for options */
-        color: #1a1a1a !important;             /* Dark text for options */
-        padding: 0.5rem !important;
+        background-color: #ffffff !important;            /* Force white background */
+        color: #1e293b !important;                       /* Force dark text */
+        padding: 8px 12px !important;                    /* Proper padding */
         font-size: 1rem !important;
         font-weight: 500 !important;
+        border: none !important;
     }
     
-    /* Additional fix for selectbox container */
-    .stSelectbox > div > div {
-        background-color: #ffffff !important;
+    /* Alternative approach using CSS variables for options */
+    .stSelectbox > div > div > select option:nth-child(even) {
+        background-color: #f8fafc !important;            /* Slight alternating background */
     }
     
-    /* Fix for selectbox label */
+    /* Label styling to match sidebar elements */
     .stSelectbox > label {
-        color: #1e293b !important;
+        color: var(--text-primary) !important;
         font-weight: 600 !important;
         margin-bottom: 0.5rem !important;
+        font-size: 1rem !important;
+    }
+    
+    /* Additional Streamlit-specific overrides for dropdown */
+    section[data-testid="stSidebar"] .stSelectbox > div > div > select {
+        background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%) !important;
+        color: #1e293b !important;
+        border: 1px solid #d1d5db !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+    
+    /* Force all dropdown text to be visible */
+    section[data-testid="stSidebar"] .stSelectbox * {
+        color: var(--text-primary) !important;
+        background-color: transparent !important;
+    }
+    
+    /* Custom dropdown arrow */
+    .stSelectbox > div > div::after {
+        content: "▼" !important;
+        position: absolute !important;
+        right: 12px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        pointer-events: none !important;
+        color: var(--text-secondary) !important;
+        font-size: 0.75rem !important;
     }
         
     /* Primary buttons */
