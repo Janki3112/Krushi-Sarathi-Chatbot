@@ -2375,7 +2375,7 @@ def main():
         font-family: 'Segoe UI', sans-serif;
     }
     .stMarkdown, .stTextInput, .stTextArea, .stChatMessageContent {
-        color: #212529 !important;  /* Force readable text color */
+        color: #ffc0cb !important;  /* Force readable text color */
     }
     .stChatMessageContent {
         background-color: #ffffff;
