@@ -1410,66 +1410,6 @@ class OptimizedRAGPipeline:
         return "\n\n".join(context_parts)
     
     def _setup_conversation_chain(self):
-        """Setup optimized conversation chain"""
-        def get_redis_history(session_id: str) -> BaseChatMessageHistory:
-            return RedisChatMessageHistory(
-                session_id=session_id,
-                redis_client=None,  # Replace with your Redis client
-            )
-        
-        # Optimized prompt template with smarter content filtering
-        prompt_template = ChatPromptTemplate.from_messages([
-            ("system", """You are an intelligent AI assistant that provides comprehensive, accurate answers with immediate inline citations.
-
-            **CITATION RULES:**
-            - Add citation numbers [1], [2], etc. immediately after EVERY factual statement
-            - Use exact citation numbers from the context provided
-            - Place citations before punctuation: "Fact [1]." not "Fact. [1]"
-            - Multiple sources: [1,2] for claims supported by multiple sources
-
-            **SMART CONTENT STRATEGY:**
-            - If local content is NOT relevant to the question, focus ONLY on web sources
-            - If web content directly answers the question, prioritize it over less relevant local content
-            - Always provide a complete answer using the MOST RELEVANT sources available
-            - Never mention that content seems unrelated - just use what's most relevant
-            - Combine complementary information from different sources naturally
-            - Write authoritatively using the best available information
-
-            **RESPONSE QUALITY:**
-            - Provide direct, comprehensive answers
-            - Use immediate inline citations after every claim
-            - Focus on user's actual question, not source limitations
-            - Maintain professional, informative tone"""),
-            MessagesPlaceholder(variable_name="history"),
-            ("human", "Context:\n{context}\n\nQuestion: {question}")
-        ])
-        
-        # Create optimized chain
-        chain = prompt_template | self.llm | StrOutputParser()
-        
-        self.conversation_chain = RunnableWithMessageHistory(
-            chain,
-            get_session_history=get_redis_history,
-            input_messages_key="question",
-            history_messages_key="history",
-        )
-    
-    def _format_clickable_citations(self) -> str:
-        """Format citations as clickable links"""
-        if not self.citations:
-            return ""
-        
-        citations_html = "\n\n**References:**\n"
-        for cite_id, info in self.citations.items():
-            if info['source_type'] == 'web' and info['url']:
-                citations_html += f"[{cite_id}] <a href='{info['url']}' target='_blank'>{info['title']}</a>\n"
-            else:
-                file_name = os.path.basename(info['title']) if info['title'] else 'Local Document'
-                citations_html += f"[{cite_id}] {file_name} (Local PDF)\n"
-        
-        return citations_html
-    
-    def _setup_conversation_chain(self):
         """Setup conversation chain with proper history management"""
         def get_session_history(session_id: str):
             """Get session history with Redis fallback"""
@@ -1493,29 +1433,50 @@ class OptimizedRAGPipeline:
         
         # Enhanced prompt template
         prompt_template = ChatPromptTemplate.from_messages([
-            ("system", """You are an intelligent AI assistant specializing in providing comprehensive, accurate answers with proper citations.
+            ("system", """You are an AI assistant specialized exclusively in agriculture.
+             
 
-**CITATION RULES:**
-- Add citation numbers [1], [2], etc. immediately after EVERY factual statement
-- Use exact citation numbers from the context provided
-- Place citations before punctuation: "Fact [1]." not "Fact. [1]"
-- Multiple sources: [1,2] for claims supported by multiple sources
+        **CRITICAL DOMAIN CHECK (Execute First):**
+        Before doing anything else, determine if the user's question is about:
+        - Crops, farming practices, soil, irrigation, fertilizers, pesticides
+        - Plant diseases, pest control, livestock, animal husbandry  
+        - Agricultural machinery, technology, weather for farming
+        - Rural development, agri-markets, agricultural economics
 
-**RESPONSE STRATEGY:**
-- Focus on the most relevant and helpful information
-- Combine information from multiple sources naturally
-- Provide practical, actionable advice when possible
-- Maintain a helpful, professional tone
-- If information is limited, acknowledge it clearly
+        If the question is NOT about agriculture:
+        1. Respond ONLY with: "I'm sorry, I can only assist with agriculture-related questions. Please ask me something about farming, crops, livestock, or related agricultural topics."
+        2. Do NOT add any citations, references, or source links
+        3. Do NOT search through any provided context
+        4. STOP processing immediately
 
-**QUALITY STANDARDS:**
-- Give direct, comprehensive answers
-- Use proper inline citations after every claim
-- Focus on answering the user's actual question
-- Maintain expertise and context awareness"""),
-            MessagesPlaceholder(variable_name="history"),
-            ("human", "Context:\n{context}\n\nQuestion: {question}")
-        ])
+        **FOR AGRICULTURE QUESTIONS ONLY:**
+        If and only if the question is agriculture-related:
+        - Provide accurate, helpful information about agricultural topics
+        - Add citation numbers [1], [2], etc. immediately after factual statements
+        - Use exact citation numbers from the context provided
+        - Place citations before punctuation: "Fact [1]." not "Fact. [1]"
+        - Multiple sources: [1,2] for claims supported by multiple sources
+        - Focus on practical, actionable advice when possible
+        - Maintain a helpful, professional tone
+
+        **STRICT RULES:**
+        - Never provide citations or references in rejection responses
+        - Never process context for non-agricultural questions
+        - Never explain why a question is outside scope beyond the standard message
+        - If unsure whether a question is agricultural, err on the side of rejection
+
+        Examples:
+        User: How do I control pests in tomato plants?
+        Assistant: [Provide detailed agricultural answer with citations]
+
+        User: Who won the football match yesterday?
+        Assistant: I'm sorry, I can only assist with agriculture-related questions. Please ask me something about farming, crops, livestock, or related agricultural topics.
+
+        User: What is the best fertilizer for wheat?
+        Assistant: [Provide detailed agricultural answer with citations]"""),
+
+                 MessagesPlaceholder(variable_name="history"),
+                ("human", "Context:\n{context}\n\nQuestion: {question}\n\n**CRITICAL INSTRUCTION: Answer ONLY using the provided agricultural context. If this question is not about agriculture, respond with the exact refusal message and provide NO citations whatsoever.**")           ])
         
         # Create chain
         chain = prompt_template | self.llm | StrOutputParser()
@@ -2176,6 +2137,7 @@ def get_translator():
     if _translator is None:
         _translator = TranslationHelper()
     return _translator
+
 def enhanced_chatbot_interface():
     """Enhanced Streamlit chatbot interface with multilingual support and session management"""
     
@@ -2390,21 +2352,9 @@ def main():
         line-height: 1.6;
     }
     
-    /* Global text color fixes - More specific */
-    .stApp {
+    /* Global text color fixes */
+    .stApp, .stApp * {
         color: var(--text-primary) !important;
-    }
-    
-    /* General text elements */
-    .stMarkdown, .stMarkdown p, .stMarkdown div, .stMarkdown span,
-    .stTextInput, .stTextArea, .stChatMessageContent,
-    p, div, span, label {
-        color: var(--text-primary) !important;
-    }
-    
-    /* Force visibility for all text content */
-    * {
-        visibility: visible !important;
     }
     
     /* Main content area */
@@ -2467,7 +2417,7 @@ def main():
         border-color: var(--accent-color) !important;
         transform: translateY(-1px) !important;
     }
-
+    
     /* Text inputs */
     .stTextInput > div > div > input {
         background-color: var(--primary-bg) !important;
@@ -2481,7 +2431,15 @@ def main():
     .stTextInput > div > div > input::placeholder {
         color: var(--text-secondary) !important;
     }
-        
+    
+    /* Select boxes */
+    .stSelectbox > div > div > select {
+        background-color: var(--primary-bg) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 0.5rem !important;
+    }
+    
     /* Primary buttons */
     .stButton > button[kind="primary"] {
         background-color: var(--accent-color) !important;
@@ -2552,69 +2510,29 @@ def main():
         color: var(--text-secondary) !important;
     }
     
-    /* Alert messages - Enhanced visibility */
+    /* Alert messages */
     .stAlert {
-        border-radius: 0.75rem !important;
-        border: 2px solid transparent !important;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-        margin: 1rem 0 !important;
-        font-weight: 500 !important;
+        border-radius: 0.5rem !important;
+        border: none !important;
+        box-shadow: var(--shadow) !important;
     }
     
-    /* Info Alert - Welcome message */
-    .stAlert[data-testid="stAlert-info"],
-    .stAlert[data-testid="stAlert-info"] div,
-    .stAlert[data-testid="stAlert-info"] p,
-    .stAlert[data-testid="stAlert-info"] span {
+    .stAlert[data-testid="stAlert-info"] {
         background-color: #dbeafe !important;
         color: #1e40af !important;
-        border: 2px solid #3b82f6 !important;
-        border-left: 6px solid #3b82f6 !important;
-        font-size: 1.1rem !important;
-        line-height: 1.6 !important;
-        padding: 1.25rem !important;
-    }
-    
-    /* Force text color in info alerts */
-    .stAlert[data-testid="stAlert-info"] * {
-        color: #1e40af !important;
-        background-color: transparent !important;
+        border-left: 4px solid #3b82f6 !important;
     }
     
     .stAlert[data-testid="stAlert-success"] {
         background-color: #dcfce7 !important;
         color: #166534 !important;
-        border: 2px solid var(--accent-color) !important;
-        border-left: 6px solid var(--accent-color) !important;
-        padding: 1.25rem !important;
-    }
-    
-    .stAlert[data-testid="stAlert-success"] * {
-        color: #166534 !important;
-        background-color: transparent !important;
+        border-left: 4px solid var(--accent-color) !important;
     }
     
     .stAlert[data-testid="stAlert-error"] {
         background-color: #fef2f2 !important;
         color: #dc2626 !important;
-        border: 2px solid #ef4444 !important;
-        border-left: 6px solid #ef4444 !important;
-        padding: 1.25rem !important;
-    }
-    
-    .stAlert[data-testid="stAlert-error"] * {
-        color: #dc2626 !important;
-        background-color: transparent !important;
-    }
-    
-    /* Additional fix for info message content */
-    .stAlert .stMarkdown,
-    .stAlert .stMarkdown p,
-    .stAlert .stMarkdown div {
-        color: inherit !important;
-        background-color: transparent !important;
-        margin: 0 !important;
-        padding: 0 !important;
+        border-left: 4px solid #ef4444 !important;
     }
     
     /* Spinner */
@@ -2691,45 +2609,8 @@ def main():
         background: #cbd5e1;
     }
     
-    /* Welcome message and info display fix */
-    [data-testid="stAlert-info"] {
-        background-color: #dbeafe !important;
-        border: 2px solid #3b82f6 !important;
-        border-left: 6px solid #3b82f6 !important;
-        border-radius: 0.75rem !important;
-        padding: 1.5rem !important;
-        margin: 1.5rem 0 !important;
-        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.15) !important;
-    }
-    
-    [data-testid="stAlert-info"] > div,
-    [data-testid="stAlert-info"] p,
-    [data-testid="stAlert-info"] span,
-    [data-testid="stAlert-info"] .stMarkdown,
-    [data-testid="stAlert-info"] .stMarkdown p,
-    [data-testid="stAlert-info"] .stMarkdown div {
-        color: #1e40af !important;
-        background-color: transparent !important;
-        font-size: 1.1rem !important;
-        font-weight: 500 !important;
-        line-height: 1.6 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-    
-    /* Additional fallback for welcome message */
-    .stAlert[data-testid="stAlert-info"]:before {
-        content: "";
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        background-color: #3b82f6;
-        border-radius: 50%;
-        margin-right: 0.5rem;
-        vertical-align: middle;
-    }
+    /* Responsive design */
+    @media (max-width: 768px) {
         .main .block-container {
             padding: 1rem 0.5rem;
         }
